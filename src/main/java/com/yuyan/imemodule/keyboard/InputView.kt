@@ -395,8 +395,18 @@ class InputView(context: Context, private val service: ImeService) : LifecycleRe
                 if (DecodingInfo.isCandidatesEmpty || DecodingInfo.isAssociate) {
                     sendKeyEvent(keyCode)
                     resetToIdleState()
+                } else if (keyCode == KeyEvent.KEYCODE_SPACE && InputModeSwitcher.isEnglish) {
+                    // 英文单词补全时，按空格退出补全并追加空格
+                    val candId = mSkbCandidatesBarView.getActiveCandNo()
+                    val text = if (mSkbCandidatesBarView.isActiveCand()) {
+                        DecodingInfo.getCandidate(candId)?.text ?: DecodingInfo.composingStrForCommit
+                    } else {
+                        DecodingInfo.composingStrForCommit
+                    }
+                    commitDecInfoText(text)
+                } else {
+                    chooseAndUpdate()
                 }
-                else chooseAndUpdate()
             }
             KeyEvent.KEYCODE_CLEAR -> resetToIdleState()
             KeyEvent.KEYCODE_ENTER -> {
